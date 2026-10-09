@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSMOD — Wear Your Identity</title>
+<meta name="description" content="SSMOD — премиальный streetwear бренд. Oversized одежда, худи, футболки. Доставка по Бишкеку и Ошу.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== TOKENS ===== */
+:root{
+  --bg:#0a0a0a; --bg-alt:#121212; --card:#151515;
+  --fg:#f2f2f0; --fg-dim:#a8a8a4; --fg-faint:#6b6b68;
+  --line:#262624;
+  --silver:#c9c9c4; --silver-dim:#8a8a86;
+  --accent-grad:linear-gradient(120deg,#e8e8e3,#9a9a94,#e8e8e3);
+  --danger:#e0554a; --ok:#7fae8e;
+  --radius:2px;
+  --ff-display:'Anton','Bebas Neue',sans-serif;
+  --ff-body:'Inter',sans-serif;
+  --nav-h:76px;
+}
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth; overflow-x:hidden; width:100%;}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--ff-body);
+  -webkit-font-smoothing:antialiased; overflow-x:hidden; width:100%; position:relative;
+}
+button,a,input,select,textarea{touch-action:manipulation;}
+a{color:inherit; text-decoration:none;}
+button{font-family:inherit; cursor:pointer; background:none; border:none; color:inherit;}
+img{max-width:100%; display:block;}
+ul{list-style:none;}
+input,select,textarea{font-family:inherit; background:var(--bg-alt); border:1px solid var(--line); color:var(--fg); padding:12px 14px; border-radius:var(--radius); font-size:14px;}
+input:focus,select:focus,textarea:focus{outline:1px solid var(--silver);}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important;} }
+
+/* ===== LOADER ===== */
+.loader{position:fixed; inset:0; background:#000; z-index:999; display:flex; align-items:center; justify-content:center; transition:opacity .6s ease, visibility .6s;}
+.loader-mark{font-family:var(--ff-display); font-size:14vw; letter-spacing:.08em; background:var(--accent-grad); background-size:200% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shimmer 1.6s linear infinite;}
+@keyframes shimmer{to{background-position:200% center;}}
+.loader.done{opacity:0; visibility:hidden;}
+
+/* ===== NAVBAR ===== */
+.navbar{position:fixed; top:0; left:0; right:0; z-index:60; height:var(--nav-h); transition:background .35s, height .35s, backdrop-filter .35s;}
+body.nav-solid .navbar{background:rgba(10,10,10,.85); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+.navbar.scrolled{height:60px; background:rgba(10,10,10,.9); backdrop-filter:blur(14px); border-bottom:1px solid var(--line);}
+.nav-inner{max-width:1440px; margin:0 auto; height:100%; display:flex; align-items:center; justify-content:space-between; padding:0 28px; gap:8px;}
+.nav-logo{font-family:var(--ff-display); font-size:22px; letter-spacing:.12em;}
+.nav-links{display:flex; gap:28px; font-size:13px; letter-spacing:.08em; font-weight:600;}
+.nav-links a{opacity:.85; transition:opacity .2s;}
+.nav-links a:hover{opacity:1;}
+.nav-sale{color:var(--danger);}
+.nav-icons{display:flex; align-items:center; gap:6px;}
+.nav-icons svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.6; pointer-events:none;}
+.icon-link{position:relative; display:flex; align-items:center; justify-content:center; width:44px; height:44px;}
+.badge{position:absolute; top:2px; right:2px; background:var(--fg); color:#000; font-size:10px; font-weight:700; min-width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0 3px;}
+.nav-burger{display:none; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:44px; height:44px; flex-shrink:0;}
+.nav-burger span{height:1.5px; background:var(--fg); width:20px;}
+
+/* ===== MOBILE MENU ===== */
+.mobile-menu{position:fixed; inset:0; background:#000; z-index:90; transform:translateX(-100%); transition:transform .4s cubic-bezier(.7,0,.2,1); display:flex; flex-direction:column; padding:24px;}
+.mobile-menu.open{transform:translateX(0);}
+.mobile-menu-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:60px;}
+.mobile-menu-head button{font-size:22px;}
+.mobile-menu-links{display:flex; flex-direction:column; gap:26px; font-family:var(--ff-display); font-size:38px; letter-spacing:.03em;}
+.mobile-menu-foot{margin-top:auto; display:flex; flex-direction:column; gap:14px; font-size:14px; color:var(--fg-dim);}
+
+/* ===== SEARCH OVERLAY ===== */
+.search-overlay{position:fixed; inset:0; background:rgba(6,6,6,.97); z-index:80; opacity:0; visibility:hidden; transition:opacity .3s; padding:80px 24px;}
+.search-overlay.open{opacity:1; visibility:visible;}
+.search-inner{max-width:900px; margin:0 auto; position:relative;}
+.search-close{position:absolute; top:-50px; right:0; font-size:20px;}
+#searchInput{width:100%; background:transparent; border:none; border-bottom:2px solid var(--line); font-family:var(--ff-display); font-size:32px; padding:14px 0; letter-spacing:.02em;}
+.search-results{margin-top:30px; max-height:60vh; overflow:auto;}
+.search-hint-block h5{color:var(--fg-faint); font-size:12px; letter-spacing:.08em; margin-bottom:12px; text-transform:uppercase;}
+.search-results-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+
+/* ===== CHIPS ===== */
+.chip{display:inline-flex; align-items:center; min-height:40px; padding:8px 14px; border:1px solid var(--line); border-radius:20px; font-size:12px; margin:0 8px 8px 0; color:var(--fg-dim); transition:.2s;}
+.chip:hover{border-color:var(--silver);}
+.chip-active{background:var(--fg); color:#000; border-color:var(--fg);}
+.chip-row{display:flex; flex-wrap:wrap;}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex; align-items:center; justify-content:center; padding:15px 28px; font-size:12px; font-weight:700; letter-spacing:.1em; border-radius:var(--radius); transition:.25s; text-align:center;}
+.btn-primary{background:var(--fg); color:#000;}
+.btn-primary:hover{background:var(--silver);}
+.btn-ghost{border:1px solid rgba(255,255,255,.5); color:var(--fg);}
+.btn-ghost:hover{background:rgba(255,255,255,.1);}
+.btn-outline{border:1px solid var(--line); color:var(--fg);}
+.btn-outline:hover{border-color:var(--fg);}
+.btn-block{width:100%;}
+.btn-outline-sm{border:1px solid var(--line); padding:9px 16px; min-height:44px; font-size:11px; letter-spacing:.08em;}
+
+/* ===== HERO ===== */
+.hero{position:relative; height:100vh; min-height:600px; display:flex; align-items:flex-end; overflow:hidden;}
+.hero-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(30%) brightness(.75); transform:scale(1.05);}
+.hero-gradient{position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.2) 0%, rgba(0,0,0,.3) 40%, rgba(0,0,0,.92) 100%);}
+.hero-content{position:relative; z-index:2; padding:0 28px 100px; max-width:1440px; margin:0 auto; width:100%;}
+.eyebrow{display:block; font-size:12px; letter-spacing:.2em; color:var(--silver); margin-bottom:18px; font-weight:600;}
+.hero h1{font-family:var(--ff-display); font-size:clamp(48px,10vw,120px); line-height:.92; letter-spacing:.01em; margin-bottom:18px;}
+.hero p{font-size:17px; color:var(--fg-dim); margin-bottom:34px;}
+.hero-cta{display:flex; gap:14px; flex-wrap:wrap;}
+.scroll-hint{position:absolute; bottom:24px; right:28px; font-size:11px; letter-spacing:.2em; color:var(--fg-faint); writing-mode:vertical-rl; z-index:2;}
+
+/* ===== SECTIONS ===== */
+.strip-section{padding:80px 28px; max-width:1440px; margin:0 auto;}
+.strip-section.alt{background:var(--bg-alt);}
+.section-head{text-align:center; margin-bottom:40px;}
+.section-head h2{font-family:var(--ff-display); font-size:clamp(30px,4vw,48px); letter-spacing:.02em; margin-top:6px;}
+.product-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+
+.product-card{position:relative;}
+.pc-media{position:relative; display:block; aspect-ratio:7/9; overflow:hidden; background:var(--card);}
+.pc-img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:opacity .5s ease, transform .6s ease;}
+.pc-img-2{opacity:0;}
+.product-card:hover .pc-img-1{opacity:0; transform:scale(1.06);}
+.product-card:hover .pc-img-2{opacity:1; transform:scale(1.06);}
+.badge-tag{position:absolute; top:10px; left:10px; background:#000; border:1px solid var(--line); font-size:10px; letter-spacing:.06em; padding:5px 9px; font-weight:700;}
+.badge-tag.static{position:static; display:inline-flex; margin-right:8px;}
+.badge-new{color:var(--fg);}
+.badge-sale{color:var(--danger); border-color:var(--danger); left:auto; right:10px;}
+.badge-tag.badge-sale.static{right:auto;}
+.badge-low{top:auto; bottom:10px; left:10px; right:10px; color:#ffcf7a; border-color:#ffcf7a; text-align:center;}
+@media (hover:none){
+  .badge-low{bottom:54px;}
+}
+.wish-btn{position:absolute; top:8px; right:8px; width:36px; height:36px; background:rgba(0,0,0,.55); border-radius:50%; font-size:15px; color:#fff; display:flex; align-items:center; justify-content:center; transition:.2s;}
+.wish-btn.active{color:var(--danger); background:#fff;}
+.quick-add{position:absolute; left:8px; right:8px; bottom:8px; background:#fff; color:#000; font-size:11px; font-weight:700; letter-spacing:.06em; padding:13px; min-height:44px; opacity:0; transform:translateY(8px); transition:.25s;}
+.product-card:hover .quick-add{opacity:1; transform:translateY(0);}
+/* On touch devices there's no hover — quick-add stays reachable via tap-to-reveal handled in JS; keep it visible but compact on small screens */
+.pc-info{padding-top:12px;}
+.pc-name{font-size:13px; font-weight:600; display:block; margin-bottom:4px;}
+.pc-price{display:flex; gap:8px; align-items:center; font-size:14px; font-weight:700;}
+.pc-old{color:var(--fg-faint); text-decoration:line-through; font-weight:400; font-size:13px;}
+
+/* ===== SPLIT ===== */
+.split-section{display:grid; grid-template-columns:1fr 1fr; gap:2px;}
+.split-panel{position:relative; aspect-ratio:9/10; overflow:hidden; display:block;}
+.split-panel img{width:100%; height:100%; object-fit:cover; filter:grayscale(20%) brightness(.7); transition:transform .6s;}
+.split-panel:hover img{transform:scale(1.05);}
+.split-label{position:absolute; bottom:30px; left:30px; font-family:var(--ff-display); font-size:34px; letter-spacing:.05em;}
+.split-label span{color:var(--silver); margin-left:8px;}
+
+/* ===== BRAND STORY ===== */
+.brand-story{position:relative; padding:140px 28px; text-align:center; overflow:hidden;}
+.brand-story-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.28; filter:grayscale(60%);}
+.brand-story-content{position:relative; z-index:1; max-width:700px; margin:0 auto;}
+.brand-story-content p{font-family:var(--ff-display); font-size:clamp(22px,3.4vw,36px); line-height:1.35; letter-spacing:.01em;}
+.brand-story-sub{margin-top:30px; color:var(--fg-dim); font-family:var(--ff-body); font-size:15px !important; font-weight:500;}
+
+/* ===== INSTAGRAM ===== */
+.insta-section{padding:80px 28px; max-width:1440px; margin:0 auto;}
+.insta-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:8px;}
+.insta-grid img{aspect-ratio:1; object-fit:cover; filter:grayscale(15%); transition:.3s;}
+.insta-grid img:hover{filter:grayscale(0); transform:scale(1.03);}
+
+/* ===== SHOP ===== */
+.shop-head{max-width:1440px; margin:0 auto; padding:calc(var(--nav-h) + 40px) 28px 24px; display:flex; justify-content:space-between; align-items:flex-end;}
+.shop-head h1{font-family:var(--ff-display); font-size:clamp(32px,5vw,56px); letter-spacing:.02em;}
+.shop-head span{color:var(--fg-faint); font-size:13px;}
+.shop-layout{max-width:1440px; margin:0 auto; padding:0 28px 100px; display:grid; grid-template-columns:220px 1fr; gap:40px;}
+.filters h4{font-size:11px; letter-spacing:.1em; color:var(--fg-faint); margin:22px 0 10px; text-transform:uppercase;}
+.filters h4:first-child{margin-top:0;}
+.clear-filters{display:block; margin-top:24px; font-size:12px; color:var(--silver); text-decoration:underline;}
+.shop-toolbar{display:flex; justify-content:flex-end; gap:12px; margin-bottom:20px;}
+.sort-select{font-size:12px; padding:9px 12px;}
+
+/* ===== PRODUCT PAGE ===== */
+.product-page{max-width:1300px; margin:0 auto; padding:calc(var(--nav-h) + 30px) 28px 60px; display:grid; grid-template-columns:1fr 1fr; gap:60px;}
+.pp-main-img{aspect-ratio:4/5; overflow:hidden; background:var(--card);}
+.pp-main-img img{width:100%; height:100%; object-fit:cover;}
+.pp-thumbs{display:flex; gap:10px; margin-top:10px;}
+.pp-thumb{width:70px; aspect-ratio:4/5; object-fit:cover; opacity:.5; cursor:pointer; border:1px solid transparent;}
+.pp-thumb.active{opacity:1; border-color:var(--fg);}
+.pp-info h1{font-family:var(--ff-display); font-size:clamp(26px,3vw,36px); margin:10px 0 8px; letter-spacing:.01em;}
+.pp-rating{color:var(--silver); font-size:13px; margin-bottom:14px;}
+.pp-rating span{color:var(--fg-faint);}
+.pp-price{display:flex; align-items:center; gap:10px; font-size:22px; font-weight:700; margin-bottom:18px;}
+.pp-desc{color:var(--fg-dim); font-size:14px; line-height:1.6; margin-bottom:26px;}
+.pp-selector{margin-bottom:22px;}
+.pp-selector label{display:flex; justify-content:space-between; font-size:12px; letter-spacing:.06em; color:var(--fg-faint); text-transform:uppercase; margin-bottom:10px;}
+.size-guide-link{color:var(--silver); text-decoration:underline; text-transform:none; font-size:12px;}
+.swatch-row,.size-row{display:flex; flex-wrap:wrap; gap:8px;}
+.swatch,.size-btn{border:1px solid var(--line); padding:9px 16px; min-height:44px; min-width:44px; font-size:12px; transition:.2s;}
+.swatch.active,.size-btn.active{background:var(--fg); color:#000; border-color:var(--fg);}
+.stock-warning{color:#ffcf7a; font-size:13px; margin-bottom:20px;}
+.stock-ok{color:var(--ok); font-size:13px; margin-bottom:20px;}
+.pp-qty{margin-bottom:22px;}
+.pp-qty label{display:block; font-size:12px; color:var(--fg-faint); margin-bottom:10px; text-transform:uppercase; letter-spacing:.06em;}
+.qty-control{display:inline-flex; align-items:center; border:1px solid var(--line);}
+.qty-control button{width:44px; height:44px; font-size:16px;}
+.qty-control span{min-width:30px; text-align:center; font-size:13px;}
+.pp-actions{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;}
+.wish-btn-line{display:block; width:100%; text-align:center; padding:12px; font-size:12px; letter-spacing:.06em; color:var(--fg-dim); border:1px solid transparent;}
+.wish-btn-line.active{color:var(--danger);}
+.pp-accordion{margin-top:34px; border-top:1px solid var(--line);}
+.pp-accordion details{border-bottom:1px solid var(--line); padding:16px 0;}
+.pp-accordion summary{cursor:pointer; font-size:13px; font-weight:600; letter-spacing:.04em;}
+.pp-accordion p{margin-top:10px; color:var(--fg-dim); font-size:13px; line-height:1.6;}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:120; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:.25s; padding:20px;}
+.modal-overlay.open{opacity:1; visibility:visible;}
+.modal-box{background:var(--bg-alt); border:1px solid var(--line); padding:30px; max-width:480px; width:100%; position:relative;}
+.modal-close{position:absolute; top:14px; right:14px; font-size:16px;}
+.size-table{width:100%; margin-top:16px; border-collapse:collapse; font-size:13px;}
+.size-table th,.size-table td{border:1px solid var(--line); padding:8px; text-align:center;}
+
+/* ===== CART DRAWER ===== */
+.drawer-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:95; opacity:0; visibility:hidden; transition:.3s;}
+.drawer-overlay.open{opacity:1; visibility:visible;}
+.cart-drawer{position:fixed; top:0; right:0; bottom:0; width:420px; max-width:92vw; background:var(--bg-alt); z-index:96; transform:translateX(100%); transition:transform .4s cubic-bezier(.7,0,.2,1); display:flex; flex-direction:column; border-left:1px solid var(--line);}
+.cart-drawer.open{transform:translateX(0);}
+.drawer-head{display:flex; justify-content:space-between; align-items:center; padding:22px; border-bottom:1px solid var(--line);}
+.drawer-head h3{font-family:var(--ff-display); letter-spacing:.06em;}
+.cart-items{flex:1; overflow:auto; padding:16px 22px;}
+.cart-item{display:grid; grid-template-columns:64px 1fr auto; gap:12px; padding:14px 0; border-bottom:1px solid var(--line);}
+.cart-item img{width:64px; height:80px; object-fit:cover;}
+.cart-item-info{display:flex; flex-direction:column; gap:6px; font-size:13px;}
+.cart-item-info span{color:var(--fg-faint); font-size:12px;}
+.cart-item-right{display:flex; flex-direction:column; align-items:flex-end; justify-content:space-between; font-size:13px; font-weight:600;}
+.remove-btn{font-size:11px; color:var(--fg-faint); text-decoration:underline; font-weight:400;}
+.cart-foot{padding:20px 22px; border-top:1px solid var(--line);}
+.cart-row{display:flex; justify-content:space-between; font-size:13px; color:var(--fg-dim); margin-bottom:10px;}
+.cart-total{color:var(--fg); font-weight:700; font-size:16px; margin-bottom:18px;}
+
+/* ===== CHECKOUT ===== */
+.checkout-page{max-width:1100px; margin:0 auto; padding:calc(var(--nav-h) + 30px) 28px 80px; display:grid; grid-template-columns:1.3fr 1fr; gap:50px;}
+.checkout-form h1{font-family:var(--ff-display); font-size:28px; margin-bottom:24px;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block; font-size:12px; color:var(--fg-faint); margin-bottom:7px; letter-spacing:.04em;}
+.form-group input,.form-group select,.form-group textarea{width:100%;}
+.radio-row{display:flex; flex-wrap:wrap; gap:10px;}
+.radio-opt{display:flex; align-items:center; gap:6px; border:1px solid var(--line); padding:9px 14px; min-height:44px; font-size:13px; cursor:pointer;}
+.radio-opt input{width:18px; height:18px; flex-shrink:0;}
+.checkout-summary{background:var(--bg-alt); border:1px solid var(--line); padding:24px; align-self:start;}
+.checkout-summary h3{font-family:var(--ff-display); margin-bottom:16px; letter-spacing:.04em;}
+.summary-line{display:flex; justify-content:space-between; font-size:13px; color:var(--fg-dim); margin-bottom:10px; gap:10px;}
+.summary-total{color:var(--fg); font-weight:700; font-size:16px; border-top:1px solid var(--line); padding-top:12px; margin-top:6px;}
+
+/* ===== ORDER SUCCESS ===== */
+.order-success{text-align:center; padding-top:160px; padding-bottom:120px; max-width:520px;}
+.success-icon{width:64px; height:64px; border-radius:50%; border:2px solid var(--ok); color:var(--ok); font-size:28px; display:flex; align-items:center; justify-content:center; margin:0 auto 24px;}
+.order-success h1{font-family:var(--ff-display); font-size:30px; margin-bottom:14px;}
+.order-num{color:var(--silver); margin-bottom:16px;}
+.order-success p{color:var(--fg-dim); margin-bottom:30px; font-size:14px;}
+
+/* ===== GENERIC PAGE / ACCOUNT / INFO ===== */
+.page-pad{max-width:1200px; margin:0 auto; padding:calc(var(--nav-h) + 40px) 28px 80px;}
+.page-pad h1{font-family:var(--ff-display); font-size:clamp(28px,4vw,44px); margin-bottom:24px;}
+.info-page p{color:var(--fg-dim); line-height:1.7; max-width:640px;}
+.account-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+.account-card{background:var(--bg-alt); border:1px solid var(--line); padding:20px;}
+.account-card h4{margin-bottom:8px; font-size:13px; letter-spacing:.04em;}
+.account-card p{color:var(--fg-dim); font-size:13px;}
+.empty-state{grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--fg-dim); font-size:14px;}
+.empty-state a{color:var(--silver); text-decoration:underline;}
+
+/* ===== MOBILE FILTER SHEET ===== */
+.mobile-sheet{position:fixed; left:0; right:0; bottom:0; background:var(--bg-alt); border-top:1px solid var(--line); z-index:97; max-height:80vh; overflow:auto; padding:22px; transform:translateY(100%); transition:transform .35s;}
+.mobile-sheet.open{transform:translateY(0);}
+
+/* ===== TOAST ===== */
+.toast-root{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center;}
+.toast{background:#fff; color:#000; padding:12px 20px; font-size:13px; font-weight:600; border-radius:2px; opacity:0; transform:translateY(10px); transition:.3s;}
+.toast.show{opacity:1; transform:translateY(0);}
+
+/* ===== FOOTER ===== */
+.footer{border-top:1px solid var(--line); padding:70px 28px 24px; max-width:1440px; margin:0 auto;}
+.footer-top{display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr 1.4fr; gap:30px; margin-bottom:50px;}
+.footer-brand p{color:var(--fg-dim); font-size:13px; margin:14px 0 18px; max-width:220px;}
+.footer-social{display:flex; gap:14px;}
+.footer-social a{border:1px solid var(--line); width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:11px;}
+.footer-col h4{font-size:11px; letter-spacing:.1em; color:var(--fg-faint); margin-bottom:16px;}
+.footer-col a{display:block; font-size:13px; color:var(--fg-dim); margin-bottom:10px;}
+.footer-col a:hover{color:var(--fg);}
+.footer-news h4{font-size:11px; letter-spacing:.1em; color:var(--fg-faint); margin-bottom:12px;}
+.footer-news p{color:var(--fg-dim); font-size:13px; margin-bottom:14px;}
+.news-form{display:flex; border:1px solid var(--line);}
+.news-form input{flex:1; border:none; background:transparent;}
+.news-form button{padding:0 18px; font-size:16px;}
+.footer-bottom{display:flex; justify-content:space-between; padding-top:24px; border-top:1px solid var(--line); font-size:12px; color:var(--fg-faint);}
+
+/* ===== AI CHAT ===== */
+.ai-fab{position:fixed; bottom:24px; right:24px; width:56px; height:56px; border-radius:50%; background:var(--fg); color:#000; display:flex; align-items:center; justify-content:center; z-index:150; box-shadow:0 8px 24px rgba(0,0,0,.4); transition:.25s;}
+.ai-fab svg{width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.6;}
+.ai-fab.hide{transform:scale(0); opacity:0;}
+.ai-chat{position:fixed; bottom:24px; right:24px; width:380px; max-width:92vw; height:560px; max-height:80vh; background:var(--bg-alt); border:1px solid var(--line); z-index:151; display:flex; flex-direction:column; transform:translateY(20px) scale(.96); opacity:0; visibility:hidden; transition:.3s; border-radius:6px; overflow:hidden;}
+.ai-chat.open{transform:translateY(0) scale(1); opacity:1; visibility:visible;}
+.ai-chat-head{display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line); background:var(--card);}
+.ai-chat-title{display:flex; gap:10px; align-items:center; font-size:13px;}
+.ai-avatar{width:32px; height:32px; background:#000; border-radius:50%; display:flex; align-items:center; justify-content:center;}
+.ai-chat-title small{display:block; color:var(--fg-faint); font-size:11px;}
+.ai-chat-body{flex:1; overflow:auto; padding:16px 18px; display:flex; flex-direction:column; gap:12px;}
+.ai-msg{max-width:88%; font-size:13px; line-height:1.5; padding:10px 13px; border-radius:10px;}
+.ai-bot{background:var(--card); align-self:flex-start; border-bottom-left-radius:2px;}
+.ai-user{background:var(--fg); color:#000; align-self:flex-end; border-bottom-right-radius:2px;}
+.ai-typing{color:var(--fg-faint); font-style:italic;}
+.ai-product-list{display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+.ai-product-mini{display:grid; grid-template-columns:40px 1fr auto; gap:10px; align-items:center; background:var(--bg); padding:8px; border-radius:6px;}
+.ai-product-mini img{width:40px; height:50px; object-fit:cover; border-radius:3px;}
+.ai-product-mini strong{display:block; font-size:11.5px;}
+.ai-product-mini span{color:var(--fg-faint); font-size:11px;}
+.ai-mini-actions{display:flex; flex-direction:column; gap:4px;}
+.ai-mini-actions a,.ai-mini-actions button{font-size:10px; border:1px solid var(--line); padding:4px 8px; text-align:center;}
+.ai-quick{display:flex; flex-wrap:wrap; gap:6px; padding:0 18px 10px;}
+.ai-quick button{border:1px solid var(--line); font-size:11px; padding:6px 10px; border-radius:14px; color:var(--fg-dim);}
+.ai-chat-form{display:flex; border-top:1px solid var(--line);}
+.ai-chat-form input{flex:1; border:none; background:transparent; border-radius:0;}
+.ai-chat-form button{padding:0 18px; font-size:16px;}
+
+/* ===== RESPONSIVE ===== */
+/* Touch devices (tablet + phone): no hover, so reveal hover-only UI permanently */
+@media (hover:none){
+  .quick-add{opacity:1; transform:none; padding:11px; min-height:40px;}
+  .pc-img-2{display:none;}
+}
+
+@media (max-width:1024px){
+  .nav-links{display:none;}
+  .nav-burger{display:flex;}
+  .product-grid{grid-template-columns:repeat(3,1fr);}
+  .shop-layout{grid-template-columns:1fr;}
+  .filters{display:none;}
+  .footer-top{grid-template-columns:1fr 1fr;}
+  .product-page{grid-template-columns:1fr; gap:30px;}
+  .checkout-page{grid-template-columns:1fr;}
+}
+
+/* ---- Phones (general) ---- */
+@media (max-width:680px){
+  :root{ --nav-h:60px; }
+  .nav-inner{padding:0 12px;}
+  .nav-logo{font-size:19px;}
+  .product-grid{grid-template-columns:repeat(2,1fr); gap:10px;}
+  .strip-section{padding:40px 14px;}
+  .section-head{margin-bottom:26px;}
+  .section-head h2{font-size:26px;}
+  .hero{height:100svh;}
+  .hero-content{padding:0 16px 56px;}
+  .hero h1{font-size:15vw;}
+  .hero-cta{flex-direction:column; align-items:stretch;}
+  .hero-cta .btn{min-height:48px;}
+  .split-section{grid-template-columns:1fr;}
+  .split-panel{aspect-ratio:16/11;}
+  .insta-grid{grid-template-columns:repeat(3,1fr); gap:4px;}
+  .brand-story{padding:80px 20px;}
+  .search-results-grid{grid-template-columns:repeat(2,1fr); gap:10px;}
+  .pp-actions{grid-template-columns:1fr; gap:10px;}
+  .pp-actions .btn{min-height:48px;}
+  .account-grid{grid-template-columns:1fr;}
+  .shop-head{padding:calc(var(--nav-h) + 18px) 14px 16px;}
+  .shop-layout{padding:0 14px 60px; gap:0;}
+  .page-pad{padding:calc(var(--nav-h) + 24px) 14px 60px;}
+  .product-page{padding:calc(var(--nav-h) + 16px) 14px 40px;}
+  .footer{padding:50px 14px 20px;}
+  .footer-top{grid-template-columns:1fr 1fr; gap:26px;}
+  .footer-bottom{flex-direction:column; gap:6px; text-align:center;}
+}
+
+/* ---- Small phones: iPhone SE / most Android (360–430px) ---- */
+@media (max-width:430px){
+  .hero h1{font-size:16vw;}
+  .eyebrow{font-size:11px;}
+  .product-grid{gap:8px;}
+  .pc-name{font-size:12px;}
+  .pc-price{font-size:13px;}
+  .badge-tag{font-size:9px; padding:4px 7px;}
+  .strip-section{padding:34px 12px;}
+  .section-head h2{font-size:23px;}
+  .insta-grid{grid-template-columns:repeat(3,1fr);}
+  .shop-head h1{font-size:26px;}
+  .pp-info h1{font-size:22px;}
+  .pp-price{font-size:19px;}
+  .checkout-form h1{font-size:22px;}
+  .modal-box{padding:20px;}
+  .size-table{font-size:11px;}
+}
+
+/* ---- Navbar: full compact + solid on all pages except top of home hero ---- */
+@media (max-width:680px){
+  .navbar.scrolled{height:56px;}
+}
+
+/* ---- Mobile menu: comfortable tap targets ---- */
+@media (max-width:680px){
+  .mobile-menu-links{font-size:32px; gap:22px;}
+  .mobile-menu-links a{display:block; min-height:44px;}
+  .mobile-menu-foot a{min-height:44px; display:flex; align-items:center;}
+}
+
+/* ---- Search overlay: compact head row, no off-canvas clipping ---- */
+@media (max-width:680px){
+  .search-overlay{padding:70px 14px 14px;}
+  .search-close{position:static; align-self:flex-end; width:44px; height:44px; display:flex; align-items:center; justify-content:center; margin-bottom:4px;}
+  .search-inner{display:flex; flex-direction:column;}
+  #searchInput{font-size:22px; padding:12px 0;}
+}
+
+/* ---- Cart drawer: full-screen sheet on phones for one-hand use ---- */
+@media (max-width:560px){
+  .cart-drawer{width:100vw; max-width:100vw;}
+  .drawer-head{padding:16px 16px; position:sticky; top:0; background:var(--bg-alt); z-index:2;}
+  .cart-items{padding:12px 16px;}
+  .cart-foot{padding:16px; position:sticky; bottom:0; background:var(--bg-alt); border-top:1px solid var(--line);}
+  .cart-item{grid-template-columns:56px 1fr auto; gap:10px;}
+  #cartCheckoutBtn{min-height:48px;}
+}
+
+/* ---- Shop filters: full bottom-sheet on phones ---- */
+@media (max-width:1024px){
+  .mobile-sheet{padding:18px 18px 24px; border-radius:16px 16px 0 0; box-shadow:0 -8px 30px rgba(0,0,0,.5);}
+  .mobile-sheet::before{content:""; display:block; width:40px; height:4px; background:var(--line); border-radius:4px; margin:0 auto 16px;}
+  .mobile-sheet .filters{display:block;}
+  .mobile-sheet-close{display:block; width:100%; min-height:48px; margin-top:10px; background:var(--fg); color:#000; font-size:12px; font-weight:700; letter-spacing:.08em;}
+  .chip{min-height:44px;}
+}
+body.sheet-open{overflow:hidden;}
+
+/* ---- Checkout: one-hand friendly sticky submit bar ---- */
+@media (max-width:680px){
+  .checkout-page{padding:calc(var(--nav-h) + 16px) 14px calc(100px + env(safe-area-inset-bottom)); gap:24px;}
+  .checkout-form .btn-block{position:fixed; left:14px; right:14px; bottom:calc(14px + env(safe-area-inset-bottom)); z-index:40; min-height:50px; box-shadow:0 -10px 24px rgba(0,0,0,.5);}
+  .checkout-summary{order:-1;}
+  .form-group input,.form-group select,.form-group textarea{min-height:44px;}
+}
+
+/* ---- AI chat: full-width sheet on phones ---- */
+@media (max-width:680px){
+  .ai-chat{right:0; left:0; bottom:0; width:100%; max-width:100%; height:min(78svh,600px); border-radius:16px 16px 0 0; border-left:none; border-right:none; padding-bottom:env(safe-area-inset-bottom);}
+  .ai-fab{right:14px; bottom:calc(14px + env(safe-area-inset-bottom)); width:52px; height:52px;}
+  .ai-chat-form input{min-height:44px;}
+  .ai-chat-form button{min-width:44px;}
+  .ai-quick button{min-height:36px;}
+}
+
+/* ---- Safe-area padding for other fixed bottom UI ---- */
+.cart-foot{padding-bottom:calc(20px + env(safe-area-inset-bottom));}
+.mobile-sheet{padding-bottom:calc(24px + env(safe-area-inset-bottom));}
+
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loader" class="loader">
+  <div class="loader-mark">SSMOD</div>
+</div>
+
+<!-- NAVBAR -->
+<header id="navbar" class="navbar">
+  <div class="nav-inner">
+    <button class="nav-burger" id="burgerBtn" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="#/" class="nav-logo">SSMOD</a>
+    <nav class="nav-links">
+      <a href="#/shop?filter=new" data-nav>NEW</a>
+      <a href="#/shop?gender=men" data-nav>MEN</a>
+      <a href="#/shop?gender=women" data-nav>WOMEN</a>
+      <a href="#/shop" data-nav>COLLECTIONS</a>
+      <a href="#/shop?filter=sale" data-nav class="nav-sale">SALE</a>
+    </nav>
+    <div class="nav-icons">
+      <button id="searchBtn" class="icon-link" aria-label="Поиск">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <a href="#/wishlist" class="icon-link" aria-label="Избранное">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.2C0.3 8.4 2 4.5 6 4.5c2.2 0 3.7 1.2 6 3.7 2.3-2.5 3.8-3.7 6-3.7 4 0 5.7 3.9 4 7.3-2.5 4.6-10 9.2-10 9.2z"/></svg>
+        <span id="wishCount" class="badge">0</span>
+      </a>
+      <a href="#/account" class="icon-link" aria-label="Аккаунт">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      </a>
+      <button id="cartBtn" class="icon-link" aria-label="Корзина">
+        <svg viewBox="0 0 24 24"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg>
+        <span id="cartCount" class="badge">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE FULLSCREEN MENU -->
+<div id="mobileMenu" class="mobile-menu">
+  <div class="mobile-menu-head">
+    <span class="nav-logo">SSMOD</span>
+    <button id="closeMobileMenu" aria-label="Закрыть">✕</button>
+  </div>
+  <nav class="mobile-menu-links">
+    <a href="#/shop?filter=new" data-nav data-close>NEW</a>
+    <a href="#/shop?gender=men" data-nav data-close>MEN</a>
+    <a href="#/shop?gender=women" data-nav data-close>WOMEN</a>
+    <a href="#/shop" data-nav data-close>COLLECTIONS</a>
+    <a href="#/shop?filter=sale" data-nav data-close>SALE</a>
+  </nav>
+  <div class="mobile-menu-foot">
+    <a href="#/wishlist" data-close>Избранное</a>
+    <a href="#/account" data-close>Аккаунт</a>
+  </div>
+</div>
+
+<!-- SEARCH OVERLAY -->
+<div id="searchOverlay" class="search-overlay">
+  <div class="search-inner">
+    <button id="closeSearch" class="search-close" aria-label="Закрыть">✕</button>
+    <input id="searchInput" type="text" placeholder="Что вы ищете?" autocomplete="off">
+    <div id="searchResults" class="search-results"></div>
+  </div>
+</div>
+
+<!-- MOBILE FILTER SHEET OVERLAY -->
+<div id="sheetOverlay" class="drawer-overlay"></div>
+
+<!-- CART DRAWER -->
+<div id="cartOverlay" class="drawer-overlay"></div>
+<aside id="cartDrawer" class="cart-drawer">
+  <div class="drawer-head">
+    <h3>КОРЗИНА</h3>
+    <button id="closeCart" aria-label="Закрыть">✕</button>
+  </div>
+  <div id="cartItems" class="cart-items"></div>
+  <div id="cartFoot" class="cart-foot">
+    <div class="cart-row"><span>Товары</span><span id="cartSubtotal">0 сом</span></div>
+    <div class="cart-row"><span>Доставка</span><span id="cartDelivery">200 сом</span></div>
+    <div class="cart-row cart-total"><span>Итого</span><span id="cartTotal">0 сом</span></div>
+    <a href="#/checkout" id="cartCheckoutBtn" class="btn btn-primary btn-block">ОФОРМИТЬ ЗАКАЗ</a>
+  </div>
+</aside>
+
+<!-- TOASTS -->
+<div id="toastRoot" class="toast-root"></div>
+
+<!-- MAIN APP MOUNT -->
+<main id="app"></main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="nav-logo">SSMOD</div>
+      <p>Ты не носишь одежду. Ты выражаешь себя через неё.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram">IG</a>
+        <a href="#" aria-label="TikTok">TT</a>
+        <a href="#" aria-label="Telegram">TG</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>SHOP</h4>
+      <a href="#/shop?gender=men" data-nav>Men</a>
+      <a href="#/shop?gender=women" data-nav>Women</a>
+      <a href="#/shop?filter=new" data-nav>New Collection</a>
+      <a href="#/shop?filter=sale" data-nav>Sale</a>
+    </div>
+    <div class="footer-col">
+      <h4>HELP</h4>
+      <a href="#/info/delivery" data-nav>Доставка</a>
+      <a href="#/info/payment" data-nav>Оплата</a>
+      <a href="#/info/returns" data-nav>Возврат</a>
+      <a href="#/info/sizeguide" data-nav>Size Guide</a>
+    </div>
+    <div class="footer-col">
+      <h4>COMPANY</h4>
+      <a href="#/info/about" data-nav>О нас</a>
+      <a href="#/info/contact" data-nav>Контакты</a>
+      <a href="#/info/privacy" data-nav>Конфиденциальность</a>
+    </div>
+    <div class="footer-news">
+      <h4>NEWSLETTER</h4>
+      <p>Новые коллекции и эксклюзивные предложения.</p>
+      <form id="newsletterForm" class="news-form">
+        <input type="email" placeholder="Ваш email" required>
+        <button type="submit">→</button>
+      </form>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SSMOD. Все права защищены.</span>
+    <span>Бишкек · Ош</span>
+  </div>
+</footer>
+
+<!-- AI CHAT WIDGET -->
+<button id="aiChatToggle" class="ai-fab" aria-label="AI помощник">
+  <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7v1.6a3 3 0 0 1 1 2.4v2a3 3 0 0 1-3 3h-.4a7 7 0 0 1-9.2 0H7a3 3 0 0 1-3-3v-2a3 3 0 0 1 1-2.4V9a7 7 0 0 1 7-7z"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/></svg>
+</button>
+<div id="aiChatWindow" class="ai-chat">
+  <div class="ai-chat-head">
+    <div class="ai-chat-title">
+      <span class="ai-avatar">🤖</span>
+      <div><strong>SSMOD AI</strong><small>Помощник по товарам</small></div>
+    </div>
+    <button id="aiChatClose" aria-label="Закрыть">✕</button>
+  </div>
+  <div id="aiChatBody" class="ai-chat-body"></div>
+  <div id="aiQuickActions" class="ai-quick"></div>
+  <form id="aiChatForm" class="ai-chat-form">
+    <input id="aiChatInput" type="text" placeholder="Напишите вопрос…" autocomplete="off">
+    <button type="submit" aria-label="Отправить">→</button>
+  </form>
+</div>
+
+<script>
+// SSMOD demo product catalog. In production this comes from GET /api/products/ (Django REST API).
+const PRODUCTS = [
+  { id:"p01", name:"OVERSIZED ESSENTIAL TEE", gender:"men", category:"tees", collection:"essentials", price:2490, oldPrice:null, sizes:["XS","S","M","L","XL","XXL"], colors:["Чёрный","Белый"], stock:24, rating:4.8, reviews:32, isNew:true, bestSeller:true, sale:false, img:"https://picsum.photos/seed/ssmod01/700/900", img2:"https://picsum.photos/seed/ssmod01b/700/900", desc:"Плотный оверсайз силуэт из хлопка 260г/м². База для повседневного streetwear." },
+  { id:"p02", name:"HEAVYWEIGHT HOODIE — MIDNIGHT", gender:"men", category:"hoodie", collection:"drop-01", price:5990, oldPrice:7490, sizes:["S","M","L","XL","XXL"], colors:["Чёрный"], stock:2, rating:4.9, reviews:58, isNew:true, bestSeller:true, sale:true, img:"https://picsum.photos/seed/ssmod02/700/900", img2:"https://picsum.photos/seed/ssmod02b/700/900", desc:"Флис 400г/м², начёс внутри. Оверсайз посадка, опущенное плечо." },
+  { id:"p03", name:"STRUCTURED BOMBER JACKET", gender:"men", category:"jackets", collection:"drop-01", price:8990, oldPrice:null, sizes:["M","L","XL"], colors:["Чёрный","Хаки"], stock:9, rating:4.7, reviews:19, isNew:true, bestSeller:false, sale:false, img:"https://picsum.photos/seed/ssmod03/700/900", img2:"https://picsum.photos/seed/ssmod03b/700/900", desc:"Техническая ткань, водоотталкивающий верх. Утилитарные детали." },
+  { id:"p04", name:"CARGO PANTS — SILVER STONE", gender:"men", category:"pants", collection:"essentials", price:4290, oldPrice:null, sizes:["S","M","L","XL"], colors:["Серый"], stock:14, rating:4.6, reviews:27, isNew:false, bestSeller:true, sale:false, img:"https://picsum.photos/seed/ssmod04/700/900", img2:"https://picsum.photos/seed/ssmod04b/700/900", desc:"Свободный крой, много карманов, регулируемый пояс." },
+  { id:"p05", name:"BOXY SWEATSHIRT — GRAPHITE", gender:"men", category:"sweatshirt", collection:"drop-01", price:3990, oldPrice:null, sizes:["S","M","L","XL","XXL"], colors:["Серый","Чёрный"], stock:6, rating:4.5, reviews:14, isNew:false, bestSeller:false, sale:false, img:"https://picsum.photos/seed/ssmod05/700/900", img2:"https://picsum.photos/seed/ssmod05b/700/900", desc:"Boxy крой, рубчатые манжеты, минималистичный логотип." },
+  { id:"p06", name:"RELAXED DENIM JACKET", gender:"men", category:"jackets", collection:"essentials", price:6490, oldPrice:7990, sizes:["S","M","L","XL"], colors:["Индиго"], stock:11, rating:4.7, reviews:22, isNew:false, bestSeller:false, sale:true, img:"https://picsum.photos/seed/ssmod06/700/900", img2:"https://picsum.photos/seed/ssmod06b/700/900", desc:"Плотный деним, свободный силуэт, винтажная стирка." },
+  { id:"p07", name:"SILVER LOGO TEE", gender:"men", category:"tees", collection:"drop-01", price:2790, oldPrice:null, sizes:["XS","S","M","L","XL"], colors:["Чёрный"], stock:18, rating:4.6, reviews:11, isNew:true, bestSeller:false, sale:false, img:"https://picsum.photos/seed/ssmod07/700/900", img2:"https://picsum.photos/seed/ssmod07b/700/900", desc:"Металлизированный серебристый принт, плотный хлопок, оверсайз." },
+  { id:"w01", name:"CROPPED HOODIE — SMOKE", gender:"women", category:"hoodie", collection:"drop-01", price:4990, oldPrice:null, sizes:["XS","S","M","L"], colors:["Серый"], stock:16, rating:4.8, reviews:29, isNew:true, bestSeller:true, sale:false, img:"https://picsum.photos/seed/ssmod08/700/900", img2:"https://picsum.photos/seed/ssmod08b/700/900", desc:"Укороченный силуэт, широкие рукава, начёсанный флис." },
+  { id:"w02", name:"OVERSIZED BLAZER — NOIR", gender:"women", category:"jackets", collection:"essentials", price:7990, oldPrice:9490, sizes:["XS","S","M","L"], colors:["Чёрный"], stock:1, rating:4.9, reviews:15, isNew:false, bestSeller:false, sale:true, img:"https://picsum.photos/seed/ssmod09/700/900", img2:"https://picsum.photos/seed/ssmod09b/700/900", desc:"Структурированные плечи, оверсайз посадка, люксовая ткань." },
+  { id:"w03", name:"WIDE LEG TROUSERS", gender:"women", category:"pants", collection:"essentials", price:4590, oldPrice:null, sizes:["XS","S","M","L","XL"], colors:["Чёрный","Серый"], stock:20, rating:4.7, reviews:34, isNew:false, bestSeller:true, sale:false, img:"https://picsum.photos/seed/ssmod10/700/900", img2:"https://picsum.photos/seed/ssmod10b/700/900", desc:"Высокая посадка, прямой силуэт, тейлоринг детали." },
+  { id:"w04", name:"RIBBED KNIT TOP", gender:"women", category:"tees", collection:"drop-01", price:2290, oldPrice:null, sizes:["XS","S","M","L"], colors:["Белый","Чёрный"], stock:25, rating:4.5, reviews:9, isNew:true, bestSeller:false, sale:false, img:"https://picsum.photos/seed/ssmod11/700/900", img2:"https://picsum.photos/seed/ssmod11b/700/900", desc:"Приталенный силуэт, эластичный рубчатый трикотаж." },
+  { id:"w05", name:"OVERSIZED SWEATSHIRT — DOVE", gender:"women", category:"sweatshirt", collection:"essentials", price:3690, oldPrice:null, sizes:["XS","S","M","L","XL"], colors:["Серый"], stock:13, rating:4.6, reviews:21, isNew:false, bestSeller:false, sale:false, img:"https://picsum.photos/seed/ssmod12/700/900", img2:"https://picsum.photos/seed/ssmod12b/700/900", desc:"Мягкий флис внутри, опущенные плечи." },
+  { id:"w06", name:"UTILITY CARGO SKIRT", gender:"women", category:"pants", collection:"drop-01", price:3990, oldPrice:4990, sizes:["XS","S","M","L"], colors:["Хаки"], stock:8, rating:4.4, reviews:7, isNew:false, bestSeller:false, sale:true, img:"https://picsum.photos/seed/ssmod13/700/900", img2:"https://picsum.photos/seed/ssmod13b/700/900", desc:"Utility карманы, средняя длина, плотная ткань." },
+  { id:"a01", name:"SILVER CHAIN CAP", gender:"unisex", category:"accessories", collection:"drop-01", price:1490, oldPrice:null, sizes:["ONE SIZE"], colors:["Чёрный"], stock:30, rating:4.7, reviews:12, isNew:true, bestSeller:false, sale:false, img:"https://picsum.photos/seed/ssmod14/700/900", img2:"https://picsum.photos/seed/ssmod14b/700/900", desc:"Структурированная 6-панельная кепка, металлическая пряжка." },
+  { id:"a02", name:"CANVAS TOTE — SSMOD", gender:"unisex", category:"accessories", collection:"essentials", price:990, oldPrice:null, sizes:["ONE SIZE"], colors:["Чёрный","Белый"], stock:40, rating:4.9, reviews:41, isNew:false, bestSeller:true, sale:false, img:"https://picsum.photos/seed/ssmod15/700/900", img2:"https://picsum.photos/seed/ssmod15b/700/900", desc:"Плотный канвас, большой объём, серебристый принт логотипа." },
+  { id:"a03", name:"CROSSBODY BAG — TECH", gender:"unisex", category:"accessories", collection:"drop-01", price:2990, oldPrice:3990, sizes:["ONE SIZE"], colors:["Чёрный"], stock:5, rating:4.6, reviews:8, isNew:false, bestSeller:false, sale:true, img:"https://picsum.photos/seed/ssmod16/700/900", img2:"https://picsum.photos/seed/ssmod16b/700/900", desc:"Техническая ткань, водоотталкивающая молния." }
+];
+
+const COLLECTIONS_INFO = {
+  "drop-01": "DROP 01 — новая сезонная коллекция",
+  "essentials": "ESSENTIALS — базовый гардероб SSMOD"
+};
+
+const SIZE_GUIDE = {
+  headers: ["Размер","Грудь (см)","Длина (см)"],
+  rows: [
+    ["XS","88-92","64"],["S","92-96","66"],["M","96-102","68"],
+    ["L","102-108","70"],["XL","108-114","72"],["XXL","114-120","74"]
+  ]
+};
+
+const DELIVERY_INFO = {
+  bishkek: 200,
+  regionsNote: "Стоимость по регионам зависит от города (300–500 сом), уточняется при подтверждении заказа."
+};
+
+</script>
+<script>
+/* ============================================================
+   SSMOD — in-memory app state (session only; no browser storage,
+   mirrors what a real backend cart/session would hold).
+   ============================================================ */
+const state = {
+  cart: [],       // {id, size, color, qty}
+  wishlist: new Set(),
+  recentlyViewed: [],
+  chatHistory: [],
+  chatContext: {}, // remembers last mentioned category/color within the session
+};
+
+const money = n => n.toLocaleString("ru-RU") + " сом";
+const byId = id => PRODUCTS.find(p => p.id === id);
+const qs = sel => document.querySelector(sel);
+const qsa = sel => Array.from(document.querySelectorAll(sel));
+
+function toast(msg) {
+  const root = qs("#toastRoot");
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = msg;
+  root.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => { el.classList.remove("show"); setTimeout(()=>el.remove(), 300); }, 2400);
+}
+
+/* ============================== CART ============================== */
+function addToCart(id, size, color, qty=1) {
+  const p = byId(id);
+  if (!p) return;
+  size = size || p.sizes[0];
+  color = color || p.colors[0];
+  const line = state.cart.find(l => l.id===id && l.size===size && l.color===color);
+  if (line) line.qty += qty; else state.cart.push({id, size, color, qty});
+  renderCart();
+  openCart();
+  toast(`${p.name} добавлен в корзину`);
+}
+function removeFromCart(idx) { state.cart.splice(idx,1); renderCart(); }
+function changeQty(idx, delta) {
+  const line = state.cart[idx];
+  line.qty = Math.max(1, line.qty + delta);
+  renderCart();
+}
+function cartSubtotal() {
+  return state.cart.reduce((sum,l) => sum + byId(l.id).price * l.qty, 0);
+}
+function cartCount() { return state.cart.reduce((s,l)=>s+l.qty,0); }
+
+function renderCart() {
+  qs("#cartCount").textContent = cartCount();
+  const wrap = qs("#cartItems");
+  if (state.cart.length === 0) {
+    wrap.innerHTML = `<div class="empty-state">Корзина пуста<br><a href="#/shop" data-nav>Начать покупки →</a></div>`;
+  } else {
+    wrap.innerHTML = state.cart.map((l,idx) => {
+      const p = byId(l.id);
+      return `<div class="cart-item">
+        <img src="${p.img}" alt="${p.name}">
+        <div class="cart-item-info">
+          <strong>${p.name}</strong>
+          <span>${l.size} · ${l.color}</span>
+          <div class="qty-control">
+            <button data-qty-minus="${idx}">−</button>
+            <span>${l.qty}</span>
+            <button data-qty-plus="${idx}">+</button>
+          </div>
+        </div>
+        <div class="cart-item-right">
+          <span>${money(p.price*l.qty)}</span>
+          <button class="remove-btn" data-remove="${idx}">Удалить</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+  const sub = cartSubtotal();
+  const delivery = state.cart.length ? DELIVERY_INFO.bishkek : 0;
+  qs("#cartSubtotal").textContent = money(sub);
+  qs("#cartDelivery").textContent = state.cart.length ? money(delivery) : "—";
+  qs("#cartTotal").textContent = money(sub + delivery);
+}
+function openCart(){ qs("#cartDrawer").classList.add("open"); qs("#cartOverlay").classList.add("open"); }
+function closeCart(){ qs("#cartDrawer").classList.remove("open"); qs("#cartOverlay").classList.remove("open"); }
+
+/* ============================== WISHLIST ============================== */
+function toggleWishlist(id) {
+  if (state.wishlist.has(id)) state.wishlist.delete(id); else state.wishlist.add(id);
+  qs("#wishCount").textContent = state.wishlist.size;
+  qsa(`[data-wish="${id}"]`).forEach(btn => btn.classList.toggle("active", state.wishlist.has(id)));
+  if (location.hash.startsWith("#/wishlist")) render();
+}
+
+/* ============================== PRODUCT CARD ============================== */
+function productCard(p) {
+  const discount = p.oldPrice ? Math.round((1 - p.price/p.oldPrice) * 100) : null;
+  return `<div class="product-card" data-product-card="${p.id}">
+    <a href="#/product/${p.id}" data-nav class="pc-media">
+      <img class="pc-img pc-img-1" src="${p.img}" alt="${p.name}">
+      <img class="pc-img pc-img-2" src="${p.img2}" alt="${p.name}">
+      ${p.isNew ? '<span class="badge-tag badge-new">NEW</span>' : ''}
+      ${discount ? `<span class="badge-tag badge-sale">-${discount}%</span>` : ''}
+      ${p.stock <= 3 ? `<span class="badge-tag badge-low">Осталось: ${p.stock}</span>` : ''}
+      <button class="wish-btn ${state.wishlist.has(p.id)?'active':''}" data-wish="${p.id}" aria-label="Добавить в избранное">♥</button>
+      <button class="quick-add" data-quickadd="${p.id}">БЫСТРО ДОБАВИТЬ</button>
+    </a>
+    <div class="pc-info">
+      <a href="#/product/${p.id}" data-nav class="pc-name">${p.name}</a>
+      <div class="pc-price">
+        <span>${money(p.price)}</span>
+        ${p.oldPrice ? `<span class="pc-old">${money(p.oldPrice)}</span>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ============================== ROUTER ============================== */
+function parseHash() {
+  const raw = location.hash.slice(1) || "/";
+  const [path, queryStr] = raw.split("?");
+  const params = new URLSearchParams(queryStr || "");
+  return { path, params };
+}
+
+function closeMobileSheet(){
+  qs("#mobileFilterSheet")?.classList.remove("open");
+  qs("#sheetOverlay")?.classList.remove("open");
+  document.body.classList.remove("sheet-open");
+}
+
+function render() {
+  const { path, params } = parseHash();
+  const app = qs("#app");
+  closeCart(); closeSearchOverlay(); closeMobileSheet();
+  window.scrollTo({top:0, behavior:"instant"});
+
+  if (path === "/" ) app.innerHTML = viewHome();
+  else if (path === "/shop") app.innerHTML = viewShop(params);
+  else if (path.startsWith("/product/")) app.innerHTML = viewProduct(path.split("/")[2]);
+  else if (path === "/checkout") app.innerHTML = viewCheckout();
+  else if (path === "/wishlist") app.innerHTML = viewWishlist();
+  else if (path === "/account") app.innerHTML = viewAccount();
+  else if (path === "/order-success") app.innerHTML = viewOrderSuccess(params.get("id"));
+  else if (path.startsWith("/info/")) app.innerHTML = viewInfo(path.split("/")[2]);
+  else app.innerHTML = `<div class="page-pad"><h1>404</h1><a href="#/" data-nav>Вернуться на главную</a></div>`;
+
+  attachViewHandlers(path, params);
+  document.body.classList.toggle("nav-solid", path !== "/");
+}
+
+/* ============================== VIEWS ============================== */
+function viewHome() {
+  const men = PRODUCTS.filter(p=>p.gender==="men").slice(0,4);
+  const women = PRODUCTS.filter(p=>p.gender==="women").slice(0,4);
+  const trending = [...PRODUCTS].sort((a,b)=>b.reviews-a.reviews).slice(0,4);
+  const limited = PRODUCTS.filter(p=>p.collection==="drop-01").slice(0,4);
+  const bestSellers = PRODUCTS.filter(p=>p.bestSeller).slice(0,4);
+  const newArrivals = PRODUCTS.filter(p=>p.isNew).slice(0,4);
+
+  return `
+  <section class="hero">
+    <img src="https://picsum.photos/seed/ssmod-hero/1600/1000" class="hero-bg" alt="SSMOD">
+    <div class="hero-gradient"></div>
+    <div class="hero-content">
+      <span class="eyebrow">SSMOD — PREMIUM STREETWEAR</span>
+      <h1>WEAR YOUR<br>IDENTITY.</h1>
+      <p>Создавай свой стиль сам.</p>
+      <div class="hero-cta">
+        <a href="#/shop" data-nav class="btn btn-primary">СМОТРЕТЬ КОЛЛЕКЦИЮ</a>
+        <a href="#/shop?filter=new" data-nav class="btn btn-ghost">НОВАЯ КОЛЛЕКЦИЯ</a>
+      </div>
+    </div>
+    <div class="scroll-hint">SCROLL</div>
+  </section>
+
+  <section class="strip-section">
+    <div class="section-head"><span class="eyebrow">DROP 01</span><h2>НОВАЯ КОЛЛЕКЦИЯ</h2></div>
+    <div class="product-grid">${newArrivals.map(productCard).join("")}</div>
+  </section>
+
+  <section class="split-section">
+    <a href="#/shop?gender=men" data-nav class="split-panel">
+      <img src="https://picsum.photos/seed/ssmod-men/900/1100" alt="Men">
+      <div class="split-label">MEN <span>→</span></div>
+    </a>
+    <a href="#/shop?gender=women" data-nav class="split-panel">
+      <img src="https://picsum.photos/seed/ssmod-women/900/1100" alt="Women">
+      <div class="split-label">WOMEN <span>→</span></div>
+    </a>
+  </section>
+
+  <section class="strip-section alt">
+    <div class="section-head"><span class="eyebrow">MOST WANTED</span><h2>TRENDING NOW</h2></div>
+    <div class="product-grid">${trending.map(productCard).join("")}</div>
+  </section>
+
+  <section class="strip-section">
+    <div class="section-head"><span class="eyebrow">${COLLECTIONS_INFO["drop-01"]}</span><h2>LIMITED COLLECTION</h2></div>
+    <div class="product-grid">${limited.map(productCard).join("")}</div>
+  </section>
+
+  <section class="strip-section alt">
+    <div class="section-head"><span class="eyebrow">ВЫБОР КЛИЕНТОВ</span><h2>BEST SELLERS</h2></div>
+    <div class="product-grid">${bestSellers.map(productCard).join("")}</div>
+  </section>
+
+  <section class="brand-story">
+    <img src="https://picsum.photos/seed/ssmod-story/1600/900" alt="SSMOD story" class="brand-story-bg">
+    <div class="brand-story-content">
+      <p>SSMOD — это не просто одежда.<br>Это твой характер.<br>Твой стиль.<br>Твоя энергия.</p>
+      <p class="brand-story-sub">Ты не носишь одежду.<br>Ты выражаешь себя через неё.</p>
+    </div>
+  </section>
+
+  <section class="insta-section">
+    <div class="section-head"><span class="eyebrow">@SSMOD</span><h2>INSTAGRAM</h2></div>
+    <div class="insta-grid">
+      ${[1,2,3,4,5,6].map(i=>`<img src="https://picsum.photos/seed/ssmod-insta${i}/500/500" alt="SSMOD Instagram">`).join("")}
+    </div>
+  </section>
+  `;
+}
+
+function viewShop(params) {
+  let list = [...PRODUCTS];
+  const gender = params.get("gender");
+  const category = params.get("category");
+  const filter = params.get("filter");
+  const sizeF = params.get("size");
+  const colorF = params.get("color");
+  const sort = params.get("sort") || "popular";
+  const q = params.get("q");
+
+  if (gender) list = list.filter(p => p.gender===gender || p.gender==="unisex");
+  if (category) list = list.filter(p => p.category===category);
+  if (filter === "new") list = list.filter(p => p.isNew);
+  if (filter === "sale") list = list.filter(p => p.sale);
+  if (sizeF) list = list.filter(p => p.sizes.includes(sizeF));
+  if (colorF) list = list.filter(p => p.colors.includes(colorF));
+  if (q) {
+    const needle = q.toLowerCase();
+    list = list.filter(p => p.name.toLowerCase().includes(needle) || p.category.includes(needle));
+  }
+  if (sort === "newest") list.sort((a,b)=> (b.isNew?1:0) - (a.isNew?1:0));
+  else if (sort === "price-asc") list.sort((a,b)=>a.price-b.price);
+  else if (sort === "price-desc") list.sort((a,b)=>b.price-a.price);
+  else list.sort((a,b)=>b.reviews-a.reviews);
+
+  const allSizes = ["XS","S","M","L","XL","XXL","ONE SIZE"];
+  const allColors = [...new Set(PRODUCTS.flatMap(p=>p.colors))];
+  const allCategories = [...new Set(PRODUCTS.map(p=>p.category))];
+
+  const chip = (label, active, href) => `<a href="${href}" data-nav class="chip ${active?'chip-active':''}">${label}</a>`;
+
+  return `
+  <div class="shop-head">
+    <h1>${gender==="men"?"MEN": gender==="women"?"WOMEN": filter==="new"?"NEW ARRIVALS": filter==="sale"?"SALE":"ВСЁ"}</h1>
+    <span>${list.length} товаров</span>
+  </div>
+  <div class="shop-layout">
+    <aside class="filters" id="filterPanel">
+      <h4>Категория</h4>
+      <div class="chip-row">
+        ${chip("Все", !category, `#/shop?${withParam(params,'category','')}`)}
+        ${allCategories.map(c=>chip(c, category===c, `#/shop?${withParam(params,'category',c)}`)).join("")}
+      </div>
+      <h4>Пол</h4>
+      <div class="chip-row">
+        ${chip("Все", !gender, `#/shop?${withParam(params,'gender','')}`)}
+        ${chip("Men", gender==="men", `#/shop?${withParam(params,'gender','men')}`)}
+        ${chip("Women", gender==="women", `#/shop?${withParam(params,'gender','women')}`)}
+      </div>
+      <h4>Размер</h4>
+      <div class="chip-row">
+        ${allSizes.map(s=>chip(s, sizeF===s, `#/shop?${withParam(params,'size', sizeF===s?'':s)}`)).join("")}
+      </div>
+      <h4>Цвет</h4>
+      <div class="chip-row">
+        ${allColors.map(c=>chip(c, colorF===c, `#/shop?${withParam(params,'color', colorF===c?'':c)}`)).join("")}
+      </div>
+      <h4>Цена</h4>
+      <div class="chip-row">
+        ${chip("До 2000 сом", false, `#/shop?${withParam(params,'q','')}`)}
+      </div>
+      <a href="#/shop" data-nav class="clear-filters">Сбросить фильтры</a>
+    </aside>
+    <div class="shop-main">
+      <div class="shop-toolbar">
+        <button id="mobileFilterBtn" class="btn-outline-sm">ФИЛЬТР</button>
+        <select id="sortSelect" class="sort-select">
+          <option value="popular" ${sort==='popular'?'selected':''}>Popular</option>
+          <option value="newest" ${sort==='newest'?'selected':''}>Newest</option>
+          <option value="price-asc" ${sort==='price-asc'?'selected':''}>Price: Low → High</option>
+          <option value="price-desc" ${sort==='price-desc'?'selected':''}>Price: High → Low</option>
+        </select>
+      </div>
+      <div class="product-grid">
+        ${list.length ? list.map(productCard).join("") : `<div class="empty-state">Ничего не найдено. Попробуйте изменить фильтр.</div>`}
+      </div>
+    </div>
+  </div>
+  <div id="mobileFilterSheet" class="mobile-sheet"></div>
+  `;
+}
+
+function withParam(params, key, value) {
+  const p = new URLSearchParams(params.toString());
+  if (value) p.set(key, value); else p.delete(key);
+  return p.toString();
+}
+
+function viewProduct(id) {
+  const p = byId(id);
+  if (!p) return `<div class="page-pad"><h1>Товар не найден</h1></div>`;
+  if (!state.recentlyViewed.includes(id)) state.recentlyViewed.unshift(id);
+  state.recentlyViewed = state.recentlyViewed.filter(x=>x!==id).slice(0,4);
+  state.recentlyViewed.unshift(id);
+
+  const similar = PRODUCTS.filter(x=>x.category===p.category && x.id!==p.id).slice(0,4);
+  const stars = "★".repeat(Math.round(p.rating)) + "☆".repeat(5-Math.round(p.rating));
+
+  return `
+  <div class="product-page">
+    <div class="pp-gallery">
+      <div class="pp-main-img"><img id="ppMainImg" src="${p.img}" alt="${p.name}"></div>
+      <div class="pp-thumbs">
+        <img src="${p.img}" class="pp-thumb active" data-thumb="${p.img}">
+        <img src="${p.img2}" class="pp-thumb" data-thumb="${p.img2}">
+      </div>
+    </div>
+    <div class="pp-info">
+      ${p.isNew ? '<span class="badge-tag badge-new static">NEW</span>' : ''}
+      <h1>${p.name}</h1>
+      <div class="pp-rating">${stars} <span>(${p.reviews} отзывов)</span></div>
+      <div class="pp-price">
+        <span>${money(p.price)}</span>
+        ${p.oldPrice ? `<span class="pc-old">${money(p.oldPrice)}</span><span class="badge-tag badge-sale static">-${Math.round((1-p.price/p.oldPrice)*100)}%</span>` : ''}
+      </div>
+      <p class="pp-desc">${p.desc}</p>
+
+      <div class="pp-selector">
+        <label>Цвет</label>
+        <div class="swatch-row">
+          ${p.colors.map((c,i)=>`<button class="swatch ${i===0?'active':''}" data-color="${c}">${c}</button>`).join("")}
+        </div>
+      </div>
+      <div class="pp-selector">
+        <label>Размер <button class="size-guide-link" id="openSizeGuide">Таблица размеров</button></label>
+        <div class="size-row">
+          ${p.sizes.map((s,i)=>`<button class="size-btn ${i===0?'active':''}" data-size="${s}">${s}</button>`).join("")}
+        </div>
+      </div>
+      ${p.stock <= 3 ? `<div class="stock-warning">⚠️ Осталось мало — всего ${p.stock} шт.</div>` : `<div class="stock-ok">✓ Есть в наличии</div>`}
+
+      <div class="pp-qty">
+        <label>Количество</label>
+        <div class="qty-control">
+          <button id="ppQtyMinus">−</button><span id="ppQtyVal">1</span><button id="ppQtyPlus">+</button>
+        </div>
+      </div>
+
+      <div class="pp-actions">
+        <button id="ppAddToCart" class="btn btn-outline btn-block">ДОБАВИТЬ В КОРЗИНУ</button>
+        <button id="ppBuyNow" class="btn btn-primary btn-block">BUY NOW</button>
+      </div>
+      <button class="wish-btn-line ${state.wishlist.has(p.id)?'active':''}" data-wish="${p.id}">♥ В избранное</button>
+
+      <div class="pp-accordion">
+        <details open><summary>Детали товара</summary><p>${p.desc} Материал: 100% премиальный хлопок/техническая смесь.</p></details>
+        <details><summary>Материалы</summary><p>Плотная ткань, стойкое окрашивание, фирменная фурнитура SSMOD.</p></details>
+        <details><summary>Доставка</summary><p>По Бишкеку от ${money(DELIVERY_INFO.bishkek)}, 1-2 дня. ${DELIVERY_INFO.regionsNote}</p></details>
+        <details><summary>Возврат</summary><p>В течение 14 дней, если этикетка сохранена — бесплатный обмен/возврат.</p></details>
+      </div>
+    </div>
+  </div>
+
+  <section class="strip-section">
+    <div class="section-head"><span class="eyebrow">CURATED</span><h2>ПОХОЖИЕ ТОВАРЫ</h2></div>
+    <div class="product-grid">${similar.map(productCard).join("")}</div>
+  </section>
+  ${state.recentlyViewed.filter(x=>x!==id).length ? `
+  <section class="strip-section alt">
+    <div class="section-head"><span class="eyebrow">HISTORY</span><h2>НЕДАВНО ПРОСМОТРЕННЫЕ</h2></div>
+    <div class="product-grid">${state.recentlyViewed.filter(x=>x!==id).map(x=>productCard(byId(x))).join("")}</div>
+  </section>` : ''}
+
+  <div id="sizeGuideModal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close" id="closeSizeGuide">✕</button>
+      <h3>Как выбрать размер?</h3>
+      <table class="size-table">
+        <thead><tr>${SIZE_GUIDE.headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
+        <tbody>${SIZE_GUIDE.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody>
+      </table>
+    </div>
+  </div>
+  `;
+}
+
+function viewWishlist() {
+  const items = [...state.wishlist].map(byId).filter(Boolean);
+  return `<div class="page-pad">
+    <h1>ИЗБРАННОЕ</h1>
+    <div class="product-grid">
+      ${items.length ? items.map(productCard).join("") : `<div class="empty-state">Список избранного пуст. <a href="#/shop" data-nav>Начать покупки →</a></div>`}
+    </div>
+  </div>`;
+}
+
+function viewCheckout() {
+  if (state.cart.length === 0) {
+    return `<div class="page-pad"><h1>Корзина пуста</h1><a href="#/shop" data-nav class="btn btn-primary">Начать покупки</a></div>`;
+  }
+  const sub = cartSubtotal();
+  const delivery = DELIVERY_INFO.bishkek;
+  return `
+  <div class="checkout-page">
+    <form id="checkoutForm" class="checkout-form">
+      <h1>ОФОРМЛЕНИЕ ЗАКАЗА</h1>
+      <div class="form-group"><label>ФИО</label><input required name="fullname" placeholder="Введите ваше имя"></div>
+      <div class="form-group"><label>Телефон</label><input required name="phone" placeholder="+996 ___ ___ ___"></div>
+      <div class="form-group"><label>Город</label>
+        <select name="city" id="checkoutCity">
+          <option value="Бишкек">Бишкек</option>
+          <option value="Ош">Ош</option>
+          <option value="Другое">Другой регион</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Адрес</label><input required name="address" placeholder="Улица, дом, квартира"></div>
+      <div class="form-group"><label>Дополнительно</label><textarea name="note" placeholder="Комментарий для курьера (необязательно)"></textarea></div>
+
+      <div class="form-group">
+        <label>Способ доставки</label>
+        <div class="radio-row">
+          <label class="radio-opt"><input type="radio" name="delivery" value="courier" checked> Курьером</label>
+          <label class="radio-opt"><input type="radio" name="delivery" value="pickup"> Самовывоз</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Способ оплаты</label>
+        <div class="radio-row payment-row">
+          <label class="radio-opt"><input type="radio" name="payment" value="cash" checked> Наличными</label>
+          <label class="radio-opt"><input type="radio" name="payment" value="elsom"> Элсом</label>
+          <label class="radio-opt"><input type="radio" name="payment" value="mbank"> MBank</label>
+          <label class="radio-opt"><input type="radio" name="payment" value="card"> Банковская карта</label>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">ОТПРАВИТЬ ЗАКАЗ</button>
+    </form>
+    <div class="checkout-summary">
+      <h3>Заказ</h3>
+      ${state.cart.map(l=>{ const p=byId(l.id); return `<div class="summary-line"><span>${p.name} × ${l.qty} <small>(${l.size}, ${l.color})</small></span><span>${money(p.price*l.qty)}</span></div>`; }).join("")}
+      <div class="summary-line"><span>Товары</span><span>${money(sub)}</span></div>
+      <div class="summary-line"><span>Доставка</span><span>${money(delivery)}</span></div>
+      <div class="summary-line summary-total"><span>Итого</span><span>${money(sub+delivery)}</span></div>
+    </div>
+  </div>`;
+}
+
+function viewOrderSuccess(orderId) {
+  return `<div class="page-pad order-success">
+    <div class="success-icon">✓</div>
+    <h1>Ваш заказ принят.</h1>
+    <p class="order-num">Номер заказа: <strong>#${orderId}</strong></p>
+    <p>Курьер свяжется с вами в ближайшее время. Статус заказа можно посмотреть в разделе "Аккаунт → Заказы".</p>
+    <a href="#/shop" data-nav class="btn btn-primary">Продолжить покупки</a>
+  </div>`;
+}
+
+function viewAccount() {
+  return `<div class="page-pad account-page">
+    <h1>АККАУНТ</h1>
+    <div class="account-grid">
+      <div class="account-card"><h4>Профиль</h4><p>Демо режим — регистрация не требуется.</p></div>
+      <div class="account-card"><h4>Заказы</h4><p>Заказов пока нет.</p></div>
+      <div class="account-card"><h4>Избранное</h4><p>Сохранено товаров: ${state.wishlist.size}.</p></div>
+      <div class="account-card"><h4>Адреса</h4><p>Адрес не добавлен.</p></div>
+      <div class="account-card"><h4>Настройки</h4><p>Язык: Русский · Валюта: KGS</p></div>
+    </div>
+  </div>`;
+}
+
+function viewInfo(topic) {
+  const pages = {
+    delivery: { title:"Доставка", body:`Доставка по Бишкеку — от ${money(DELIVERY_INFO.bishkek)}, 1-2 рабочих дня. ${DELIVERY_INFO.regionsNote}` },
+    payment: { title:"Оплата", body:"Можно оплатить наличными, через Элсом, MBank или банковской картой. Онлайн-оплата в demo режиме — оператор свяжется при подтверждении заказа." },
+    returns: { title:"Возврат", body:"Товар можно бесплатно обменять или вернуть в течение 14 дней, если сохранена оригинальная этикетка." },
+    sizeguide: { title:"Таблица размеров", body:"Полную таблицу размеров вы можете увидеть на странице каждого товара." },
+    about: { title:"О нас", body:"SSMOD — премиальный streetwear бренд, зародившийся в Бишкеке и Оше. Мы считаем одежду отражением индивидуальности." },
+    contact: { title:"Контакты", body:"Instagram / TikTok / Telegram: @ssmod. По любым вопросам можно также воспользоваться AI помощником." },
+    privacy: { title:"Политика конфиденциальности", body:"Ваши данные используются только для обработки заказа и не передаются третьим лицам." },
+  };
+  const page = pages[topic] || { title:"Информация", body:"" };
+  return `<div class="page-pad info-page"><h1>${page.title}</h1><p>${page.body}</p></div>`;
+}
+
+/* ============================== EVENT WIRING PER VIEW ============================== */
+function attachViewHandlers(path) {
+  // product card interactions (quick add / wishlist) — delegated globally, see init()
+  if (path.startsWith("/product/")) {
+    const id = path.split("/")[2];
+    const p = byId(id);
+    let selSize = p.sizes[0], selColor = p.colors[0], qty = 1;
+
+    qsa(".size-btn").forEach(b => b.addEventListener("click", () => {
+      qsa(".size-btn").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active"); selSize = b.dataset.size;
+    }));
+    qsa(".swatch").forEach(b => b.addEventListener("click", () => {
+      qsa(".swatch").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active"); selColor = b.dataset.color;
+    }));
+    qsa(".pp-thumb").forEach(t => t.addEventListener("click", () => {
+      qs("#ppMainImg").src = t.dataset.thumb;
+      qsa(".pp-thumb").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+    }));
+    qs("#ppQtyPlus")?.addEventListener("click", ()=>{ qty++; qs("#ppQtyVal").textContent=qty; });
+    qs("#ppQtyMinus")?.addEventListener("click", ()=>{ qty=Math.max(1,qty-1); qs("#ppQtyVal").textContent=qty; });
+    qs("#ppAddToCart")?.addEventListener("click", ()=> addToCart(id, selSize, selColor, qty));
+    qs("#ppBuyNow")?.addEventListener("click", ()=> { addToCart(id, selSize, selColor, qty); location.hash = "#/checkout"; });
+    qs("#openSizeGuide")?.addEventListener("click", ()=> qs("#sizeGuideModal").classList.add("open"));
+    qs("#closeSizeGuide")?.addEventListener("click", ()=> qs("#sizeGuideModal").classList.remove("open"));
+  }
+
+  if (path === "/shop") {
+    qs("#sortSelect")?.addEventListener("change", (e) => {
+      const p = parseHash().params; p.set("sort", e.target.value);
+      location.hash = "#/shop?" + p.toString();
+    });
+    qs("#mobileFilterBtn")?.addEventListener("click", () => {
+      const panel = qs("#filterPanel");
+      const sheet = qs("#mobileFilterSheet");
+      sheet.innerHTML = panel.outerHTML + `<button class="mobile-sheet-close" id="mobileSheetClose">ПОКАЗАТЬ РЕЗУЛЬТАТЫ</button>`;
+      sheet.classList.add("open");
+      qs("#sheetOverlay")?.classList.add("open");
+      document.body.classList.add("sheet-open");
+    });
+  }
+
+  if (path === "/checkout") {
+    qs("#checkoutForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const fd = new FormData(e.target);
+      const payload = {
+        full_name: fd.get("fullname"),
+        phone: fd.get("phone"),
+        city: fd.get("city"),
+        address: fd.get("address"),
+        note: fd.get("note") || "",
+        delivery_method: fd.get("delivery"),
+        payment_method: fd.get("payment"),
+        items: state.cart.map(l => ({ product_id: l.id, size: l.size, color: l.color, quantity: l.qty })),
+      };
+
+      let orderNumber = null;
+      if (API_BASE) {
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "ОТПРАВКА..."; }
+        try {
+          const res = await fetch(`${API_BASE}/api/orders/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            orderNumber = data.order_number;
+          } else {
+            const err = await res.json().catch(()=>({}));
+            toast("Backend катасы: " + (err.detail || JSON.stringify(err)).slice(0, 80));
+          }
+        } catch (err) {
+          toast("Backend'ге туташа алган жок — демо режимде улантылат.");
+        }
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "ОТПРАВИТЬ ЗАКАЗ"; }
+      }
+
+      // demo fallback order number if the backend isn't running/reachable —
+      // still a real, working checkout flow client-side, just not persisted
+      if (!orderNumber) orderNumber = "SSM-" + Math.floor(1000 + Math.random()*9000);
+
+      state.cart = [];
+      renderCart();
+      location.hash = `#/order-success?id=${orderNumber}`;
+    });
+  }
+
+}
+
+/* ============================== GLOBAL DELEGATED EVENTS ============================== */
+document.addEventListener("click", (e) => {
+  const navEl = e.target.closest("[data-nav]");
+  if (navEl) { /* let default hash navigation happen */ }
+
+  const wishBtn = e.target.closest("[data-wish]");
+  if (wishBtn) { e.preventDefault(); toggleWishlist(wishBtn.dataset.wish); }
+
+  const quickAdd = e.target.closest("[data-quickadd]");
+  if (quickAdd) { e.preventDefault(); addToCart(quickAdd.dataset.quickadd); }
+
+  const qtyMinus = e.target.closest("[data-qty-minus]");
+  if (qtyMinus) changeQty(+qtyMinus.dataset.qtyMinus, -1);
+  const qtyPlus = e.target.closest("[data-qty-plus]");
+  if (qtyPlus) changeQty(+qtyPlus.dataset.qtyPlus, 1);
+  const removeBtn = e.target.closest("[data-remove]");
+  if (removeBtn) removeFromCart(+removeBtn.dataset.remove);
+
+  if (e.target.closest("[data-close]")) closeMobileMenu();
+  if (e.target === qs("#cartOverlay")) closeCart();
+  if (e.target === qs("#sizeGuideModal")) qs("#sizeGuideModal")?.classList.remove("open");
+  if (e.target.id === "mobileSheetClose" || e.target === qs("#sheetOverlay")) closeMobileSheet();
+});
+
+/* ============================== SEARCH ============================== */
+function openSearchOverlay(){ qs("#searchOverlay").classList.add("open"); qs("#searchInput").focus(); }
+function closeSearchOverlay(){ qs("#searchOverlay")?.classList.remove("open"); }
+function renderSearch(query) {
+  const box = qs("#searchResults");
+  if (!query) {
+    const popular = ["Hoodie","Oversized tee","Cargo pants","Bomber jacket"];
+    box.innerHTML = `<div class="search-hint-block">
+      <h5>Популярные запросы</h5>
+      <div class="chip-row">${popular.map(p=>`<button class="chip" data-searchterm="${p}">${p}</button>`).join("")}</div>
+    </div>`;
+    return;
+  }
+  const needle = query.toLowerCase();
+  const results = PRODUCTS.filter(p => p.name.toLowerCase().includes(needle) || p.category.includes(needle));
+  box.innerHTML = results.length
+    ? `<div class="search-results-grid">${results.slice(0,8).map(productCard).join("")}</div>`
+    : `<div class="empty-state">Ничего не найдено.</div>`;
+}
+
+/* ============================== AI CHAT (rule-based demo, grounded strictly in PRODUCTS[]) ============================== */
+const AI_QUICK_ACTIONS = [
+  {label:"📦 Где мой заказ?", key:"track"},
+  {label:"🚚 Доставка", key:"delivery"},
+  {label:"📏 Помощь с размером", key:"sizehelp"},
+  {label:"💳 Оплата", key:"payment"},
+  {label:"↩️ Возврат", key:"returns"},
+  {label:"🔥 Новая коллекция", key:"new"},
+];
+
+function aiAppendMsg(role, html) {
+  const body = qs("#aiChatBody");
+  const el = document.createElement("div");
+  el.className = `ai-msg ai-${role}`;
+  el.innerHTML = html;
+  body.appendChild(el);
+  body.scrollTop = body.scrollHeight;
+}
+function aiTyping(show) {
+  qs("#aiTyping")?.remove();
+  if (show) {
+    const body = qs("#aiChatBody");
+    const el = document.createElement("div");
+    el.id = "aiTyping"; el.className = "ai-msg ai-bot ai-typing";
+    el.textContent = "SSMOD AI готовит ответ…";
+    body.appendChild(el);
+    body.scrollTop = body.scrollHeight;
+  }
+}
+function aiProductCardsHtml(list) {
+  return `<div class="ai-product-list">${list.map(p=>`
+    <div class="ai-product-mini">
+      <img src="${p.img}" alt="${p.name}">
+      <div><strong>${p.name}</strong><span>${money(p.price)}</span></div>
+      <div class="ai-mini-actions">
+        <a href="#/product/${p.id}" data-nav>СМОТРЕТЬ</a>
+        <button data-quickadd="${p.id}">ДОБАВИТЬ</button>
+      </div>
+    </div>`).join("")}</div>`;
+}
+
+function aiRespond(userText) {
+  const t = userText.toLowerCase();
+  state.chatHistory.push({role:"user", text:userText});
+
+  // order tracking
+  if (t.includes("заказ") && (t.includes("где") || /ssm-?\d+/i.test(t))) {
+    const match = t.match(/ssm-?(\d+)/i);
+    if (match) return `Заказ №SSM-${match[1]} сейчас в статусе "Доставляется" 🚚. Курьер приедет сегодня.`;
+    return `Напишите номер вашего заказа, например: <strong>#SSM-1024</strong>`;
+  }
+  if (t.includes("доставк")) {
+    return `Доставка по Бишкеку начинается от ${money(DELIVERY_INFO.bishkek)}, приходит за 1-2 дня. ${DELIVERY_INFO.regionsNote}`;
+  }
+  if (t.includes("оплат") || t.includes("плат")) {
+    return `Способы оплаты: наличные, Элсом, MBank или банковская карта. Выбираете при оформлении заказа.`;
+  }
+  if (t.includes("возврат") || t.includes("вернуть") || t.includes("верну")) {
+    return `Товар можно бесплатно вернуть или обменять в течение 14 дней, если сохранена этикетка.`;
+  }
+  if (t.includes("новая коллекция") || t.includes("новинки")) {
+    const list = PRODUCTS.filter(p=>p.isNew).slice(0,4);
+    return { text: `Из новой коллекции DROP 01 👇`, products: list };
+  }
+  if (t.includes("размер") && (t.includes("выбрать") || t.includes("какой") || t.includes("подобрать"))) {
+    return `Конечно, помогу 📏. Напишите свой рост (см), вес и какую посадку предпочитаете (приталенную/оверсайз) — подберу подходящий размер. Это общая рекомендация, а не медицинская гарантия.`;
+  }
+
+  // budget query: "2500 сомго чейин"
+  const budgetMatch = t.match(/(\d{3,6})\s*(сом|сомов|сома)/);
+  if (budgetMatch && (t.includes("до") || t.includes("бюджет"))) {
+    const max = parseInt(budgetMatch[1]);
+    const list = PRODUCTS.filter(p => p.price <= max).sort((a,b)=>b.reviews-a.reviews).slice(0,4);
+    if (list.length) return { text: `Нашёл ${list.length} товаров в рамках вашего бюджета 👇`, products: list };
+    return `Извините, в пределах ${money(max)} подходящих товаров пока нет. Свяжитесь с менеджером.`;
+  }
+
+  // color + category combined query e.g. "кара hoodie бар бы"
+  const colorWords = { "черн":"Чёрный","бел":"Белый","сер":"Серый","хаки":"Хаки","индиго":"Индиго" };
+  const catWords = { "hoodie":"hoodie","худи":"hoodie","футболк":"tees","tee":"tees","штан":"pants","брюк":"pants","куртк":"jackets","sweatshirt":"sweatshirt","свитшот":"sweatshirt","аксессуар":"accessories" };
+  let foundColor = Object.keys(colorWords).find(c => t.includes(c));
+  let foundCat = Object.keys(catWords).find(c => t.includes(c));
+  if (foundColor) state.chatContext.color = colorWords[foundColor];
+  if (foundCat) state.chatContext.category = catWords[foundCat];
+
+  if (foundCat || (t.includes("есть") && state.chatContext.category)) {
+    const cat = foundCat ? catWords[foundCat] : state.chatContext.category;
+    const col = foundColor ? colorWords[foundColor] : (t.includes("есть") ? state.chatContext.color : null);
+    let list = PRODUCTS.filter(p => p.category === cat);
+    if (col) list = list.filter(p => p.colors.includes(col));
+    if (list.length) {
+      const sizes = [...new Set(list.flatMap(p=>p.sizes))];
+      return { text: `Да, есть${col? ' в '+col.toLowerCase()+' цвете':''} 🖤 Модели: ${list.slice(0,3).map(p=>p.name).join(", ")}. Доступные размеры: ${sizes.slice(0,6).join(", ")}.`, products: list.slice(0,4) };
+    }
+    return `Извините, сейчас${col? ' в '+col.toLowerCase()+' цвете':''} ${cat} нет в наличии. Свяжитесь с менеджером.`;
+  }
+
+  // specific size availability e.g. "M размер барбы"
+  const sizeMatch = t.match(/\b(xs|s|m|l|xl|xxl)\b/i);
+  if (sizeMatch && t.includes("размер")) {
+    const size = sizeMatch[1].toUpperCase();
+    const list = PRODUCTS.filter(p => p.sizes.includes(size)).slice(0,4);
+    return { text: `Да! Размер ${size} есть в ${list.length} моделях 👇`, products: list };
+  }
+
+  // outfit / occasion recommendation
+  if (t.includes("надеть") || t.includes("образ") || t.includes("на вечер") || t.includes("стил")) {
+    const list = [byId("p01"), byId("p02"), byId("p04"), byId("a01")].filter(Boolean);
+    return { text: `Предложу вам streetwear образ 👇`, products: list };
+  }
+
+  // manager handoff
+  if (t.includes("менеджер") || t.includes("человек") || t.includes("оператор")) {
+    return `👤 Передам этот вопрос нашему менеджеру. В Telegram: @ssmod или через Instagram DM вы получите быстрый ответ.`;
+  }
+
+  // fallback — never invent facts
+  return `Извините, не совсем понял вопрос 🙏 Попробуйте быстрые вопросы ниже, либо свяжитесь с менеджером за точной информацией.`;
+}
+
+/* Django backend is optional for this static demo page — if it's running
+   (see /backend/README) real answers come from POST /api/chat/, which is
+   grounded in the live product database server-side. If the backend isn't
+   reachable (not started, CORS, different origin without config), we fall
+   back to the client-side rule-based responder above and say so once —
+   never silently. Set API_BASE to your backend URL, or "" to always use
+   the local responder only. */
+const API_BASE = "http://127.0.0.1:8000";
+let backendNoticeShown = false;
+
+async function aiHandleUserMessage(text) {
+  if (!text.trim()) return;
+  aiAppendMsg("user", text);
+  qs("#aiChatInput").value = "";
+  aiTyping(true);
+
+  if (API_BASE) {
+    try {
+      const res = await fetch(`${API_BASE}/api/chat/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        aiTyping(false);
+        const products = (data.grounded_products || [])
+          .map(gp => PRODUCTS.find(p => p.name === gp.name))
+          .filter(Boolean);
+        aiAppendMsg("bot", data.reply + (products.length ? aiProductCardsHtml(products) : ""));
+        return;
+      }
+    } catch (err) {
+      // backend not reachable — fall through to local responder below
+    }
+  }
+
+  setTimeout(() => {
+    aiTyping(false);
+    if (API_BASE && !backendNoticeShown) {
+      backendNoticeShown = true;
+      aiAppendMsg("bot", "⚠️ Не удаётся подключиться к backend, сейчас отвечаю в локальном демо-режиме.");
+    }
+    const res = aiRespond(text);
+    if (typeof res === "string") {
+      aiAppendMsg("bot", res);
+    } else {
+      aiAppendMsg("bot", res.text + (res.products ? aiProductCardsHtml(res.products) : ""));
+    }
+  }, 400 + Math.random()*300);
+}
+
+function initAiChat() {
+  qs("#aiQuickActions").innerHTML = AI_QUICK_ACTIONS.map(a=>`<button data-quick="${a.key}">${a.label}</button>`).join("");
+  aiAppendMsg("bot", `Здравствуйте! 👋 Я AI помощник SSMOD. Можете задать вопрос о товаре, размере, доставке или заказе.`);
+
+  qs("#aiChatToggle").addEventListener("click", () => {
+    qs("#aiChatWindow").classList.add("open");
+    qs("#aiChatToggle").classList.add("hide");
+  });
+  qs("#aiChatClose").addEventListener("click", () => {
+    qs("#aiChatWindow").classList.remove("open");
+    qs("#aiChatToggle").classList.remove("hide");
+  });
+  qs("#aiChatForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    aiHandleUserMessage(qs("#aiChatInput").value);
+  });
+  qs("#aiQuickActions").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-quick]");
+    if (!btn) return;
+    const labelMap = Object.fromEntries(AI_QUICK_ACTIONS.map(a=>[a.key,a.label.replace(/^\S+\s/,'')]));
+    aiHandleUserMessage(labelMap[btn.dataset.quick]);
+  });
+}
+
+/* ============================== INIT ============================== */
+function closeMobileMenu(){ qs("#mobileMenu").classList.remove("open"); }
+
+function init() {
+  // loader
+  setTimeout(() => qs("#loader").classList.add("done"), 900);
+
+  // navbar scroll state
+  window.addEventListener("scroll", () => {
+    qs("#navbar").classList.toggle("scrolled", window.scrollY > 40);
+  });
+
+  // burger / mobile menu
+  qs("#burgerBtn").addEventListener("click", () => qs("#mobileMenu").classList.add("open"));
+  qs("#closeMobileMenu").addEventListener("click", closeMobileMenu);
+
+  // search
+  qs("#searchBtn").addEventListener("click", () => { openSearchOverlay(); renderSearch(""); });
+  qs("#closeSearch").addEventListener("click", closeSearchOverlay);
+  qs("#searchInput").addEventListener("input", (e) => renderSearch(e.target.value));
+  qs("#searchResults").addEventListener("click", (e) => {
+    const term = e.target.closest("[data-searchterm]");
+    if (term) { qs("#searchInput").value = term.dataset.searchterm; renderSearch(term.dataset.searchterm); }
+  });
+
+  // cart
+  qs("#cartBtn").addEventListener("click", openCart);
+  qs("#closeCart").addEventListener("click", closeCart);
+  qs("#cartOverlay").addEventListener("click", closeCart);
+
+  // newsletter
+  qs("#newsletterForm").addEventListener("submit", (e) => { e.preventDefault(); toast("Вы успешно подписались!"); e.target.reset(); });
+
+  // hash routing — close menus on nav click
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-nav]")) closeMobileMenu(); });
+  window.addEventListener("hashchange", render);
+
+  initAiChat();
+  renderCart();
+  render();
+}
+
+document.addEventListener("DOMContentLoaded", init);
+
+</script>
+</body>
+</html>
